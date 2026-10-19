@@ -118,6 +118,35 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 footer{margin-top:28px;font-size:.8rem;color:var(--muted);text-align:center}
 footer a{color:inherit}
 @media (prefers-reduced-motion:no-preference){.drill{transition:background .15s,border-color .15s}}
+.rot{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.9rem;color:var(--muted)}
+.rot .seg{display:flex;gap:4px;margin-left:auto}
+.rot .seg button{min-width:44px;height:36px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font:700 1rem "Barlow Semi Condensed",sans-serif;cursor:pointer}
+.rot .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rot .seg button.all{font:600 .85rem Barlow,sans-serif}
+.dayTag{display:inline-block;margin-left:6px;padding:0 6px;border-radius:5px;font:700 .72rem Barlow,sans-serif;background:var(--line);color:var(--ink);vertical-align:middle}
+.howBtn{border:0;border-top:1px solid var(--line);background:transparent;color:var(--muted);font:600 .85rem Barlow,sans-serif;text-align:left;padding:8px 12px;cursor:pointer}
+.how{padding:0 12px 12px;font-size:.92rem;line-height:1.45}
+.how p{margin:0 0 8px;white-space:pre-wrap}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.thumbs button{padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper);width:84px;height:84px;cursor:zoom-in;position:relative}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs .rm{position:absolute;top:2px;right:2px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:.8rem;cursor:pointer}
+.links{display:flex;flex-direction:column;gap:6px}
+.links a{color:var(--ink);font-weight:600;word-break:break-all}
+.lk{display:flex;gap:6px;align-items:center}
+.lk a{flex:1}
+.media{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.media textarea{min-height:70px;font-size:16px}
+.paste{border:1.5px dashed var(--line);border-radius:8px;padding:10px;color:var(--muted);font-size:.9rem;min-height:44px;outline:none;margin-top:6px}
+.paste:focus{border-color:var(--c);color:var(--ink)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.chips .lbl{margin:0 4px 0 0}
+.chips button{height:34px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:600 .9rem Barlow,sans-serif;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:#fff}
+.mtog{margin-top:8px;border:0;background:transparent;color:var(--ink);font:600 .9rem Barlow,sans-serif;padding:4px 0;cursor:pointer}
+.lightbox{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
+.lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+.rotset{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:14px}
 </style>
 </head>
 <body>
@@ -131,6 +160,7 @@ footer a{color:inherit}
       <div class="date" id="dateLbl"></div>
       <button id="next" aria-label="Next day">›</button>
     </div>
+    <div class="rot" id="rotRow" hidden><span id="rotHint"></span><div class="seg" id="rotSeg"></div></div>
     <div class="strip" id="strip" aria-label="Last 14 days"></div>
     <div class="banner sample" id="sampleBar" hidden><p><b>Sample data.</b> Nothing you do here is saved.</p><button id="useSample" class="ghost">Use these activities</button><button id="endSample">Exit sample</button></div>
     <div class="banner" id="installBar" hidden><p id="installTxt"></p><button id="installBtn" hidden>Install</button><button class="x" id="installX" aria-label="Dismiss">✕</button></div>
@@ -162,22 +192,26 @@ footer a{color:inherit}
   <section id="edView" hidden>
     <h2>Activities &amp; categories</h2>
     <div class="hint" style="margin:-4px 0 12px">Changes save automatically. Tap ✕ twice to remove. Removing hides it; past logs are kept.</div>
+    <div class="rotset chips" id="rotSet"></div>
     <div id="edList"></div>
     <button class="add big" id="addCat">+ New category</button>
     <div class="status" id="edStatus"></div>
     <div class="data">
       <h2>Your data</h2>
       <div class="hint" style="margin:-4px 0 4px">Your log is stored only on this device. Export a backup now and then, and before changing phones.</div>
-      <div class="row2"><button class="btn ghost" id="expJson">Export backup</button><button class="btn ghost" id="impJson">Import backup</button></div>
+      <div class="row2"><button class="btn ghost" id="expJson">Export backup</button><button class="btn ghost" id="impJson">Import file</button></div>
+      <button class="btn ghost" id="expProg">Share my exercise list (no log)</button>
       <button class="btn ghost" id="expCsv">Export spreadsheet (CSV) for your PT</button>
       <button class="btn ghost" id="sampleBtn2">Try with sample data</button>
       <a class="btn ghost" id="singleDl" href="rehab-log.html" download="rehab-log.html">Download single-file version</a>
       <input type="file" id="impFile" accept=".json,application/json" hidden>
+      <input type="file" id="photoFile" accept="image/*" multiple hidden>
       <div class="confirm" id="impConfirm" hidden><p id="impTxt"></p><div class="row2"><button class="btn" id="impGo" style="background:#C0392B;border-color:#C0392B">Replace my data</button><button class="btn ghost" id="impCancel">Cancel</button></div></div>
     </div>
-    <footer>Rehab Log · free and open source · <a href="https://github.com/jwyngard/rehab-log">source</a> · v1.0</footer>
+    <footer>Rehab Log · free and open source · <a href="https://github.com/jwyngard/rehab-log">source</a> · v1.1</footer>
   </section>
 </main>
+<div class="lightbox" id="lightbox" hidden><img id="lbImg" alt=""></div>
 <script>
 const COLORS=["#1E7F86","#B07A12","#6B4FA0","#B4463C","#2F7A3E","#3D6FB0","#C2185B","#5D6D7E"];
 const UNITS=["reps","min","sec","laps","miles"];
@@ -251,6 +285,52 @@ function persist(){
 function queueSave(){clearTimeout(saveTimer);saveTimer=setTimeout(persist,300)}
 function saveCfg(){clearTimeout(cfgTimer);cfgTimer=setTimeout(persist,300)}
 
+/* ---------- photos (IndexedDB) ---------- */
+const pdb={_db:null,
+  open(){if(!this._db)this._db=new Promise((res,rej)=>{const r=indexedDB.open("rehabPhotos",1);r.onupgradeneeded=()=>r.result.createObjectStore("p");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});return this._db},
+  async put(id,blob){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction("p","readwrite");t.objectStore("p").put(blob,id);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})},
+  async get(id){try{const db=await this.open();return await new Promise(res=>{const q=db.transaction("p").objectStore("p").get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)})}catch(e){return null}},
+  async del(id){try{const db=await this.open();db.transaction("p","readwrite").objectStore("p").delete(id)}catch(e){}}};
+const urlCache={};
+async function photoURL(id){if(urlCache[id])return urlCache[id];const b=await pdb.get(id);if(!b)return null;return urlCache[id]=URL.createObjectURL(b)}
+async function shrink(file,max=1280){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    const k=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    const c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    return await new Promise(res=>c.toBlob(b=>res(b||file),"image/jpeg",.82));
+  }finally{URL.revokeObjectURL(url)}
+}
+async function addPhotos(it,files){
+  const imgs=[...files].filter(f=>f&&f.type&&f.type.startsWith("image/"));if(!imgs.length)return false;
+  if(sample){setStatus("Sample data · photos not saved");return true}
+  setStatus("Adding photo…");
+  for(const f of imgs){try{const b=await shrink(f);const id="p"+uid()+uid();await pdb.put(id,b);it.photos=[...(it.photos||[]),id]}catch(e){setStatus("Couldn't add that photo")}}
+  changed(true);return true;
+}
+function addLink(it,u){u=(u||"").trim();if(!u)return false;if(!/^https?:\/\//i.test(u))u="https://"+u;try{new URL(u)}catch(e){return false}
+  it.links=[...(it.links||[]),u];changed(true);return true}
+function linkLabel(u){try{const h=new URL(u).hostname.replace(/^www\./,"");return /youtu/.test(h)?"▶ Video (YouTube)":/vimeo/.test(h)?"▶ Video (Vimeo)":"🔗 "+h}catch(e){return u}}
+function openPhoto(url){$("lbImg").src=url;$("lightbox").hidden=false}
+function blobToDataURL(b){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(b)})}
+async function dataURLToBlob(u){return (await fetch(u)).blob()}
+async function collectPhotos(c){const out={};for(const cat of c.cats)for(const it of cat.items)for(const id of (it.photos||[])){const b=await pdb.get(id);if(b)out[id]=await blobToDataURL(b)}return out}
+async function storePhotos(ph){for(const id in (ph||{})){try{await pdb.put(id,await dataURLToBlob(ph[id]));delete urlCache[id]}catch(e){}}}
+
+/* ---------- day rotation ---------- */
+let viewAll=false;
+const ROT=()=>({0:[],2:["A","B"],3:["A","B","C"]})[cfg.rot||0]||[];
+function loggedOn(k){const c=cnt(k);return Object.keys(c).some(id=>c[id]>0)}
+function suggestDay(k){const L=ROT();if(!L.length)return null;
+  const ks=Object.keys(data).filter(x=>x<k&&data[x]&&data[x].rd&&loggedOn(x)).sort();
+  if(!ks.length)return L[0];const last=data[ks[ks.length-1]].rd;const i=L.indexOf(last);return L[(i+1)%L.length]}
+function dayLetter(k){const L=ROT();if(!L.length)return null;const r=day(k).rd;return L.includes(r)?r:suggestDay(k)}
+function showsOn(it,letter){return !letter||!it.days||!it.days.length||it.days.includes(letter)}
+function setDayLetter(L){viewAll=false;const d={...day(cur)};d.rd=L;data[cur]=d;queueSave();buildLog();render()}
+function go(k){cur=k;viewAll=false;buildLog();render()}
+
 /* ---------- export / import ---------- */
 function stamp(){return today()}
 async function saveFile(name,text,type){
@@ -264,19 +344,26 @@ async function saveFile(name,text,type){
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
 }
 function realState(){return sample?{d:realData,c:realCfg}:{d:data,c:cfg}}
-function exportJson(){
-  const s=realState();
-  saveFile(`rehab-log-backup-${stamp()}.json`,JSON.stringify({app:"rehab-log",version:1,exported:new Date().toISOString(),cfg:s.c,data:s.d},null,1),"application/json");
+async function exportJson(){
+  const s=realState();setStatus("Preparing backup…");
+  const photos=await collectPhotos(s.c);
+  await saveFile(`rehab-log-backup-${stamp()}.json`,JSON.stringify({app:"rehab-log",kind:"backup",version:2,exported:new Date().toISOString(),cfg:s.c,data:s.d,photos}),"application/json");
+  setStatus("Backup exported",true);
+}
+async function exportProgram(){
+  const s=realState();const c=clone(s.c);c.cats=c.cats.filter(x=>!x.off).map(x=>({...x,items:x.items.filter(i=>!i.off)}));
+  const photos=await collectPhotos(c);
+  await saveFile(`rehab-log-exercises-${stamp()}.json`,JSON.stringify({app:"rehab-log",kind:"program",version:2,name:"Exercise list",exported:new Date().toISOString(),cfg:c,photos}),"application/json");
 }
 function csvCell(v){v=v==null?"":String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function exportCsv(){
   const s=realState();const items={};s.c.cats.forEach(c=>c.items.forEach(i=>items[i.id]={...i,cat:c.name}));
-  const rows=[["Date","Category","Activity","Sets","Per set","Unit","Total","Notes"]];
+  const rows=[["Date","Day","Category","Activity","Sets","Per set","Unit","Total","Notes"]];
   Object.keys(s.d).sort().forEach(k=>{
     const d=s.d[k]||{};const c=d.c||{};const v=d.v||{};let first=true;
     Object.keys(c).forEach(id=>{const it=items[id]||{name:id,cat:"",unit:"",def:1};const per=typeof v[id]==="number"?v[id]:it.def;
-      rows.push([k,it.cat,it.name,c[id],per,it.unit,c[id]*per,first?(d.notes||""):""]);first=false});
-    if(first&&d.notes)rows.push([k,"","","","","","",d.notes]);
+      rows.push([k,d.rd||"",it.cat,it.name,c[id],per,it.unit,c[id]*per,first?(d.notes||""):""]);first=false});
+    if(first&&d.notes)rows.push([k,d.rd||"","","","","","","",d.notes]);
   });
   saveFile(`rehab-log-${stamp()}.csv`,rows.map(r=>r.map(csvCell).join(",")).join("\r\n"),"text/csv");
 }
@@ -285,18 +372,43 @@ function onImportFile(f){
   const rd=new FileReader();
   rd.onload=()=>{
     let o;try{o=JSON.parse(rd.result)}catch(e){o=null}
-    if(!o||o.app!=="rehab-log"||!o.cfg||!Array.isArray(o.cfg.cats)||typeof o.data!=="object"){alertBox("That file isn't a Rehab Log backup.");return}
-    pendingImport=o;const n=Object.keys(o.data).length;const when=o.exported?new Date(o.exported).toLocaleDateString():"unknown date";
-    $("impTxt").textContent=`Backup from ${when}: ${n} day${n===1?"":"s"} logged, ${o.cfg.cats.filter(c=>!c.off).length} categories. This replaces everything currently on this device.`;
+    const prog=o&&o.kind==="program";
+    if(!o||o.app!=="rehab-log"||!o.cfg||!Array.isArray(o.cfg.cats)||(!prog&&typeof o.data!=="object")){alertBox("That file isn't a Rehab Log backup or exercise list.");return}
+    pendingImport=o;const when=o.exported?new Date(o.exported).toLocaleDateString():"unknown date";
+    const nItems=o.cfg.cats.reduce((a,c)=>a+c.items.filter(i=>!i.off).length,0);
+    if(prog){$("impGo").textContent="Add exercises";$("impGo").style.cssText="";
+      $("impTxt").textContent=`Exercise list "${o.name||"Exercises"}": ${nItems} exercises in ${o.cfg.cats.length} categories${o.cfg.rot?`, ${o.cfg.rot===3?"A/B/C":"A/B"} rotation`:""}. Adds to and updates your list; your log isn't changed.`}
+    else{$("impGo").textContent="Replace my data";$("impGo").style.cssText="background:#C0392B;border-color:#C0392B";
+      const n=Object.keys(o.data).length;$("impTxt").textContent=`Backup from ${when}: ${n} day${n===1?"":"s"} logged, ${o.cfg.cats.filter(c=>!c.off).length} categories. This replaces everything currently on this device.`}
     $("impConfirm").hidden=false;$("impConfirm").scrollIntoView({block:"center"});
   };
   rd.readAsText(f);
 }
 function alertBox(t){$("impTxt").textContent=t;$("impConfirm").hidden=false;$("impGo").hidden=true}
-function doImport(){
+function mergeProgram(p){
+  const pc=p.cfg;if(pc.rot&&(cfg.rot||0)<pc.rot)cfg.rot=pc.rot;
+  const find=id=>{for(const c of cfg.cats){const i=c.items.findIndex(x=>x.id===id);if(i>=0)return[c,i]}return null};
+  let added=0,updated=0;
+  pc.cats.forEach(pcat=>{
+    let cat=cfg.cats.find(c=>c.id===pcat.id);
+    if(!cat){cat={id:pcat.id||uid(),name:pcat.name,color:pcat.color||COLORS[cfg.cats.length%COLORS.length],items:[]};cfg.cats.push(cat)}
+    else{cat.off=false;if(pcat.name)cat.name=pcat.name;if(pcat.color)cat.color=pcat.color}
+    pcat.items.forEach(pi=>{
+      const hit=find(pi.id);
+      if(pi.off){if(hit){hit[0].items[hit[1]].off=true}return}
+      if(hit){Object.assign(hit[0].items[hit[1]],clone(pi),{off:false});updated++}
+      else{cat.items.push(clone(pi));added++}
+    });
+  });
+  return [added,updated];
+}
+async function doImport(){
   if(!pendingImport)return;
+  const o=pendingImport;pendingImport=null;
   if(sample)endSample(false);
-  data=pendingImport.data;cfg=pendingImport.cfg;pendingImport=null;persist();
+  await storePhotos(o.photos);
+  if(o.kind==="program"){const[a,u]=mergeProgram(o);persist();$("impConfirm").hidden=true;viewAll=false;tab("log");buildLog();render();setStatus(`Added ${a}, updated ${u} exercises`,true);return}
+  data=o.data;cfg=o.cfg;persist();
   $("impConfirm").hidden=true;rebuild();setStatus("Backup imported",true);
 }
 
@@ -329,24 +441,31 @@ function per(k,id){const v=(day(k).v||{})[id];return typeof v==="number"?v:null}
 function defOf(id){const it=item(id);return it&&typeof it.def==="number"?it.def:1}
 function lastPer(id){const ks=Object.keys(data).sort().reverse();for(const k of ks){if(k>cur)continue;const v=per(k,id);if(v!=null)return v}return defOf(id)}
 function total(k,id){const n=cnt(k)[id]||0;if(!n)return 0;const v=per(k,id);return n*(v==null?defOf(id):v)}
-function bump(id,n){const d={...day(cur)};const c={...cnt(cur)};c[id]=Math.max(0,(c[id]||0)+n);if(!c[id])delete c[id];d.c=c;delete d.done;
+function bump(id,n){const d={...day(cur)};if(ROT().length&&!d.rd)d.rd=dayLetter(cur);const c={...cnt(cur)};c[id]=Math.max(0,(c[id]||0)+n);if(!c[id])delete c[id];d.c=c;delete d.done;
   const v={...(d.v||{})};if(c[id]&&v[id]==null)v[id]=lastPer(id);d.v=v;data[cur]=d;render();queueSave()}
 function setPer(id,val){const d={...day(cur)};const v={...(d.v||{})};if(val==="")delete v[id];else v[id]=Number(val);d.v=v;data[cur]=d;queueSave();updateTot()}
 const unitLbl=u=>({reps:"Reps",min:"Min",sec:"Sec",laps:"Laps",miles:"Miles"}[u]||u)+" per set";
 
+const openHow=new Set();
 function buildLog(){
   const root=$("cats");root.innerHTML="";
   $("welcome").hidden=activeCats().length>0;
   $("noteWrap").hidden=!activeCats().length;
+  const letter=viewAll?null:dayLetter(cur);const logged=cnt(cur);
+  buildRot();
   activeCats().forEach(c=>{
+    if(letter&&c.items.length&&!activeItems(c).some(i=>showsOn(i,letter)||logged[i.id]))return;
     const h=el("h2");const hl=el("span","cat-h");const sw=el("i");hl.append(sw,c.name);h.append(hl);const sm=el("small");sm.dataset.cat=c.id;h.append(sm);
     const list=el("div","list");list.style.setProperty("--c",c.color);h.style.setProperty("--c",c.color);
     const items=activeItems(c);
     if(!items.length){const e=el("div","hint","No activities yet — add some on the Edit tab.");list.append(e)}
     items.forEach(it=>{
+      if(letter&&!showsOn(it,letter)&&!logged[it.id])return;
       const w=el("div","drill");w.dataset.id=it.id;
       const top=el("div","head");
-      const b=el("button","body",it.name);if(it.note)b.append(el("small",null,it.note));
+      const b=el("button","body",it.name);
+      if(!letter&&ROT().length&&it.days&&it.days.length)b.append(el("span","dayTag",it.days.join("/")));
+      if(it.note)b.append(el("small",null,it.note));
       b.setAttribute("aria-label",it.name+": add a set");b.onclick=()=>bump(it.id,1);
       const ctr=el("div","ctr");
       const mi=el("button",null,"−");mi.setAttribute("aria-label",it.name+": remove a set");mi.onclick=()=>bump(it.id,-1);
@@ -356,10 +475,32 @@ function buildLog(){
       const amt=el("label","amt",unitLbl(it.unit));
       const inp=el("input");inp.type="number";inp.inputMode="decimal";inp.min="0";inp.step="any";
       inp.addEventListener("input",()=>setPer(it.id,inp.value.trim()));
-      amt.append(inp,el("span","tot"));w.append(top,amt);list.append(w);
+      amt.append(inp,el("span","tot"));w.append(top,amt);
+      const np=(it.photos||[]).length,nl=(it.links||[]).length;
+      if(it.how||np||nl){
+        const hb=el("button","howBtn");const open=openHow.has(it.id);
+        hb.textContent=(open?"▾ ":"▸ ")+"How to"+(np?` · ${np} photo${np>1?"s":""}`:"")+(nl?` · ${nl} link${nl>1?"s":""}`:"");
+        hb.setAttribute("aria-expanded",open);
+        hb.onclick=()=>{open?openHow.delete(it.id):openHow.add(it.id);buildLog();render()};
+        w.append(hb);
+        if(open){const hw=el("div","how");if(it.how)hw.append(el("p",null,it.how));
+          if(np){const th=el("div","thumbs");(it.photos||[]).forEach(pid=>{const bt=el("button");bt.setAttribute("aria-label","View photo");const im=el("img");im.alt=it.name;bt.append(im);th.append(bt);
+            photoURL(pid).then(u=>{if(u){im.src=u;bt.onclick=()=>openPhoto(u)}else bt.remove()})});hw.append(th)}
+          if(nl){const ls_=el("div","links");(it.links||[]).forEach(u=>{const a=el("a",null,linkLabel(u));a.href=u;a.target="_blank";a.rel="noopener";ls_.append(a)});hw.append(ls_)}
+          w.append(hw)}
+      }
+      list.append(w);
     });
     root.append(h,list);
   });
+}
+function buildRot(){
+  const L=ROT();const row=$("rotRow");row.hidden=!L.length||$("logView").hidden;if(!L.length)return;
+  const cur_=viewAll?null:dayLetter(cur);const saved=day(cur).rd;const sug=suggestDay(cur);
+  $("rotHint").textContent=viewAll?"Showing all exercises":saved?`Day ${saved}`:`Suggested: Day ${sug}`;
+  const seg=$("rotSeg");seg.innerHTML="";
+  L.forEach(x=>{const b=el("button",null,x);b.setAttribute("aria-pressed",x===cur_);b.setAttribute("aria-label","Day "+x);b.onclick=()=>setDayLetter(x);seg.append(b)});
+  const a=el("button","all","All");a.setAttribute("aria-pressed",viewAll);a.onclick=()=>{viewAll=!viewAll;buildLog();render()};seg.append(a);
 }
 function updateTot(){document.querySelectorAll("#cats .drill").forEach(w=>{const id=w.dataset.id;const n=cnt(cur)[id]||0;const it=item(id);
   const v=per(cur,id);w.querySelector(".tot").textContent=n?`${n} × ${v??"?"} = ${total(cur,id)} ${it.unit}`:""})}
@@ -368,7 +509,7 @@ function catSets(k,c){const x=cnt(k);return c.items.reduce((a,i)=>a+(x[i.id]||0)
 function renderStrip(){
   const s=$("strip");s.innerHTML="";
   for(let i=13;i>=0;i--){const k=addDays(today(),-i);const any=cfg.cats.some(c=>catSets(k,c));const e=el("i");
-    e.className=(any?"on":"")+(k===cur?" cur":"");e.title=k;e.addEventListener("click",()=>{cur=k;tab("log")});s.append(e)}
+    e.className=(any?"on":"")+(k===cur?" cur":"");e.title=k+(day(k).rd?" · Day "+day(k).rd:"");e.addEventListener("click",()=>{tab("log");go(k)});s.append(e)}
 }
 function render(){
   const d=fromIso(cur), t=today();
@@ -433,7 +574,52 @@ function delBtn(label,fn){
   };
   return b;
 }
+function buildRotSet(){
+  const r=$("rotSet");r.innerHTML="";r.append(el("span","lbl","Day rotation"));
+  [[0,"Off"],[2,"A / B"],[3,"A / B / C"]].forEach(([v,t])=>{const b=el("button",null,t);b.setAttribute("aria-pressed",(cfg.rot||0)===v);b.onclick=()=>{cfg.rot=v;changed(true)};r.append(b)});
+}
+const openMedia=new Set();
+function itemDays(box,it){
+  const L=ROT();if(!L.length)return;
+  const ch=el("div","chips");ch.append(el("span","lbl","Days"));
+  const every=!it.days||!it.days.length;
+  const eb=el("button",null,"Every day");eb.setAttribute("aria-pressed",every);eb.onclick=()=>{it.days=[];changed(true)};ch.append(eb);
+  L.forEach(x=>{const on=!every&&it.days.includes(x);const b=el("button",null,x);b.setAttribute("aria-pressed",on);
+    b.onclick=()=>{let d=new Set(every?[]:it.days);on?d.delete(x):d.add(x);d=[...d].filter(y=>L.includes(y)).sort();it.days=d.length===L.length?[]:d;changed(true)};ch.append(b)});
+  box.append(ch);
+}
+function itemMedia(box,it){
+  const np=(it.photos||[]).length,nl=(it.links||[]).length,open=openMedia.has(it.id);
+  const t=el("button","mtog",(open?"▾ ":"▸ ")+"Instructions, photos & links"+(np||nl||it.how?` (${[it.how?"text":"",np?np+" photo"+(np>1?"s":""):"",nl?nl+" link"+(nl>1?"s":""):""].filter(Boolean).join(", ")})`:""));
+  t.onclick=()=>{open?openMedia.delete(it.id):openMedia.add(it.id);buildEdit()};box.append(t);
+  if(!open)return;
+  const m=el("div","media");
+  const lab=el("label");lab.append(el("span","lbl","Instructions"));const ta=el("textarea");ta.value=it.how||"";ta.placeholder="Steps from your PT (optional)";
+  ta.oninput=()=>{it.how=ta.value;saveCfg();buildLog();render()};lab.append(ta);m.append(lab);
+  if(np){const th=el("div","thumbs");(it.photos||[]).forEach(pid=>{const bt=el("button");const im=el("img");im.alt="";bt.append(im);
+    const rm=el("button","rm","✕");rm.setAttribute("aria-label","Remove photo");rm.onclick=e=>{e.stopPropagation();it.photos=it.photos.filter(x=>x!==pid);pdb.del(pid);changed(true)};
+    bt.append(rm);th.append(bt);photoURL(pid).then(u=>{if(u){im.src=u;bt.onclick=()=>openPhoto(u)}})});m.append(th)}
+  if(nl){const ls_=el("div","links");(it.links||[]).forEach((u,i)=>{const r=el("div","lk");const a=el("a",null,linkLabel(u));a.href=u;a.target="_blank";a.rel="noopener";
+    r.append(a,ib("✕","Remove link",()=>{it.links.splice(i,1);changed(true)},"del"));ls_.append(r)});m.append(ls_)}
+  const r2=el("div","r");
+  const ap=el("button","ib",null);ap.style.cssText="width:auto;padding:0 12px;font:600 .9rem Barlow,sans-serif";ap.textContent="📷 Add photo";
+  ap.onclick=()=>{photoTarget=it;$("photoFile").value="";$("photoFile").click()};
+  const li=el("input");li.type="url";li.placeholder="Paste a video or web link";li.inputMode="url";
+  const lb=ib("+","Add link",()=>{if(addLink(it,li.value))li.value="";else li.focus()});
+  li.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();lb.click()}};
+  r2.append(ap);m.append(r2);const r3=el("div","r");r3.append(li,lb);m.append(r3);
+  const pz=el("div","paste");pz.contentEditable="true";pz.setAttribute("role","textbox");pz.setAttribute("aria-label","Paste a photo or link");pz.textContent="Tap here, then Paste a photo or link";
+  pz.onfocus=()=>{pz.textContent=""};pz.onblur=()=>{pz.textContent="Tap here, then Paste a photo or link"};
+  pz.onpaste=async e=>{e.preventDefault();const cd=e.clipboardData;const files=[...(cd&&cd.files||[])];
+    if(!files.length&&cd&&cd.items)for(const x of cd.items){if(x.kind==="file"){const f=x.getAsFile();if(f)files.push(f)}}
+    if(files.length&&await addPhotos(it,files))return;
+    const txt=cd?cd.getData("text"):"";if(txt&&addLink(it,txt))return;setStatus("Nothing to paste — copy a photo or link first")};
+  pz.oninput=()=>{const imgs=pz.querySelectorAll("img");if(imgs.length){Promise.all([...imgs].map(i=>fetch(i.src).then(r=>r.blob()).then(b=>new File([b],"p.jpg",{type:b.type||"image/jpeg"})).catch(()=>null))).then(fs=>addPhotos(it,fs.filter(Boolean)))}pz.innerHTML=""};
+  m.append(pz);box.append(m);
+}
+let photoTarget=null;
 function buildEdit(){
+  buildRotSet();
   const root=$("edList");root.innerHTML="";
   const cats=cfg.cats;
   cats.forEach((c,ci)=>{
@@ -462,7 +648,7 @@ function buildEdit(){
       un.onchange=()=>{it.unit=un.value;saveCfg();buildLog();render()};f2.append(un);
       const f3=el("label");f3.append(el("span","lbl","Default"));const df=el("input");df.type="number";df.inputMode="decimal";df.value=it.def??"";
       df.oninput=()=>{const v=df.value.trim();it.def=v===""?1:Number(v);saveCfg();render()};f3.append(df);
-      g.append(f1,f2,f3);w.append(r1,g);box.append(w);
+      g.append(f1,f2,f3);w.append(r1,g);w.style.setProperty("--c",c.color);itemDays(w,it);itemMedia(w,it);box.append(w);
     });
     const add=el("button","add","+ Add activity");
     add.onclick=()=>{c.items.push({id:uid(),name:"New activity",note:"",unit:"reps",def:10});changed(true);
@@ -483,11 +669,11 @@ function rebuild(){
 
 /* ---------- wiring ---------- */
 buildLog();bindNotes();
-$("prev").onclick=()=>{cur=addDays(cur,-1);render()};
-$("next").onclick=()=>{if(cur<today()){cur=addDays(cur,1);render()}};
-function tab(v){$("logView").hidden=v!=="log";$("revView").hidden=v!=="rev";$("edView").hidden=v!=="ed";$("navRow").hidden=v!=="log";
+$("prev").onclick=()=>go(addDays(cur,-1));
+$("next").onclick=()=>{if(cur<today())go(addDays(cur,1))};
+function tab(v){$("logView").hidden=v!=="log";$("rotRow").hidden=v!=="log"||!ROT().length;$("revView").hidden=v!=="rev";$("edView").hidden=v!=="ed";$("navRow").hidden=v!=="log";
   $("tLog").setAttribute("aria-pressed",v==="log");$("tRev").setAttribute("aria-pressed",v==="rev");$("tEd").setAttribute("aria-pressed",v==="ed");
-  if(v==="ed")buildEdit();render()}
+  if(v==="ed")buildEdit();buildLog();render();scrollTo(0,0)}
 $("tLog").onclick=()=>tab("log");$("tRev").onclick=()=>tab("rev");$("tEd").onclick=()=>tab("ed");
 render();
 $("startSetup").onclick=()=>{tab("ed");$("addCat").click()};
@@ -497,6 +683,11 @@ $("expJson").onclick=exportJson;$("expCsv").onclick=exportCsv;
 $("impJson").onclick=()=>{$("impFile").value="";$("impFile").click()};
 $("impFile").onchange=e=>{const f=e.target.files[0];if(f){$("impGo").hidden=false;onImportFile(f)}};
 $("impGo").onclick=doImport;$("impCancel").onclick=()=>{pendingImport=null;$("impConfirm").hidden=true;$("impGo").hidden=false};
+$("expProg").onclick=exportProgram;
+$("photoFile").onchange=async e=>{const fs=[...e.target.files];if(photoTarget&&fs.length)await addPhotos(photoTarget,fs)};
+$("lightbox").onclick=()=>{$("lightbox").hidden=true;$("lbImg").removeAttribute("src")};
+addEventListener("keydown",e=>{if(e.key==="Escape")$("lightbox").hidden=true});
+buildLog();render();
 setupInstall();
 </script>
 </body>

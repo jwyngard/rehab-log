@@ -1,5 +1,5 @@
 // Rehab Log offline support: serve from cache, refresh in the background.
-const CACHE = "rehab-log-v1";
+const CACHE = "rehab-log-v2";
 const FILES = [
   "./", "index.html", "manifest.webmanifest",
   "icons/icon-32.png", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
