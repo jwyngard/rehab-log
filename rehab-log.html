@@ -417,10 +417,11 @@ let deferredPrompt=null;
 function setupInstall(){
   const web=location.protocol.startsWith("http");
   if(!web){$("singleDl").hidden=true;return}
+  const framed=window.top!==window;if(framed){$("singleDl").hidden=true}
   if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
   if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
   const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
-  if(standalone||ls.get("rlInstallX",false))return;
+  if(framed||standalone||ls.get("rlInstallX",false))return;
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
   if(ios){$("installTxt").innerHTML="Install: tap <b>Share</b> <span aria-hidden=\"true\">⬆︎</span> then <b>Add to Home Screen</b>.";$("installBar").hidden=false}
   addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installTxt").textContent="Install Rehab Log as an app on this device.";$("installBtn").hidden=false;$("installBar").hidden=false});
